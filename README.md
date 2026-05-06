@@ -3,10 +3,11 @@
 
 ---
 
-The EyeLink plugin for OpenSesame 4 helps you control and communicate with EyeLink eye trackers. Install (section 1) or update (section 8) to the latest release of the plugin, and download the most recent example scripts that use an SR Research recommended implementation.
+The EyeLink plugin for OpenSesame 4 helps you control and communicate with EyeLink eye trackers. Install (section 1) or update (section 7.2) to the latest release of the plugin, and download the most recent example scripts that use an SR Research recommended implementation.
 
 ## License
 Modify the source code to meet your experimental needs.
+
 **Eyelink Plugin for OpenSesame 4**
 (packages: opensesame-plugin-eyelink, opensesame-eyelink-coregraphics, sr-research-pylink)
 
