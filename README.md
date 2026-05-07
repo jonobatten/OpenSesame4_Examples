@@ -7,7 +7,6 @@ The EyeLink plugin for OpenSesame 4 helps you control and communicate with EyeLi
 
 ## License
 Modify the source code to meet your experimental needs.
-
 **Eyelink Plugin for OpenSesame 4**
 (packages: opensesame-plugin-eyelink, opensesame-eyelink-coregraphics, sr-research-pylink)
 
@@ -316,22 +315,26 @@ To determine your `--abi` and `--platform` tags:
 * **`--platform`:** Common platform tags include `win_amd64` (64-bit Windows), `macosx_10_9_x86_64` (Intel macOS), `macosx_11_0_arm64` (Apple Silicon macOS), or `manylinux2014_x86_64` (Linux).
 
 For example, to download the packages for a Display PC running **64-bit Windows** and **Python 3.13**, run the following command:
-`pip download --only-binary=:all: --python-version 3.13 --platform win_amd64 --abi cp313 --no-deps sr-research-pylink opensesame-eyelink-coregraphics opensesame-plugin-eyelink -d ./eyelink_packages`
+```
+pip download --only-binary=:all: --python-version 3.13 --platform win_amd64 --abi cp313 --no-deps sr-research-pylink opensesame-eyelink-coregraphics opensesame-plugin-eyelink -d ./eyelink_packages `
+```
 
 **Step 2: Transfer the files**
 Move the `eyelink_packages` folder to your offline Display PC using a USB drive.
 
 **Step 3: Install the packages on the Display PC**
 Open OpenSesame on your offline Display PC, navigate to the location where you saved the `eyelink_packages` folder, and run the following command to install the packages directly from the local files:
-`pip install --no-index --find-links=./eyelink_packages pygame sr-research-pylink pygame-eyelink-coregraphics`
+```
+pip install --no-index --find-links=./eyelink_packages pygame sr-research-pylink pygame-eyelink-coregraphics`
+```
 
 ### 7.2 Technical Support
 A good first troubleshooting step is to check if you have the latest versions of both of the plugin and its core dependencies.
 
 In the Console of OpenSesame paste the following command and press Enter:
-
-`pip install sr-research-pylink opensesame-eyelink-coregraphics opensesame-plugin-eyelink --upgrade`
-
+```
+pip install sr-research-pylink opensesame-eyelink-coregraphics opensesame-plugin-eyelink --upgrade
+```
 Once completed, please close and reopen OpenSesame to see and use the updates.
 
 If you encounter any issues running the provided example scripts, or if you need assistance integrating EyeLink tracking into your own OpenSesame experiments, please do not hesitate to reach out to our support team. 
