@@ -235,58 +235,100 @@ This task requires precise timing for audio playback. Please bear in mind that S
 The overall organization of the script is not complicated - for introductory tutorials on programming in OpenSesame please check the Tutorial section on the OpenSesame website, [http://osdoc.cogsci.nl](http://osdoc.cogsci.nl).
 
 ### 6.2 Image order randomization and interest areas
-The Visual World task uses inline scripts, for example the “sti_preparation” inline item. Here we first create a list of four screen locations with the `xy_circle()` function. Then, we change the position of the objects based on the location specified in the “block” loop. The “location” of each object is specified in the block loop as integers, i.e., 1, 2, 3, 4. We use this variable as an index to set the position of each object by using the list of screen coordinates (`sti_pos`) we created with `xy_circle()`.
+The Visual World task uses inline scripts, for example the “randomize_send_msg” inline item. Here in the 'Prepare' tab we first create a list of four screen locations with the `xy_circle()` function. Then, we change the position of the objects based on the location specified in the “block” loop. The “location” of each object is specified in the block loop as integers, i.e., 1, 2, 3, 4. We use this variable as an index to set the position of each object by using the list of screen coordinates (`sti_pos`) we created with `xy_circle()`.
+
+>**Important:** For this code to work, this `inline script` must be placed immediately **after** your `stimulus_display` sketchpad in the trial sequence. OpenSesame executes the `Prepare` phase sequentially. If you place this script before the sketchpad, the .canvas object will not exist yet, and you will receive an AttributeError
+
 ```
-# the positions of the objects
-pos = xy_circle(n=4, rho = 250)
+# Prepare the stimuli around four random locations
+# 
+pos = xy_circle(n=4, rho = 250)  # possible image positions on a virtual circle
+
+img_w, img_h =[240, 240]  # width and height of the image
 
 # get the canvas on which the objects are shown
 sti = items['stimulus_display'].canvas
 
-# Clear the screen in Data Viewer
-exp.eyelink.sendMessage('!V CLEAR_SCREEN 128 128 128')
-
-# width and height of the images we use
-img_w, img_h =[240, 240]
-
-# position the images (tar, dis_1, dis_2, dis_3)
-pos_index = [var.target_loc-1, var.distractor_1_loc-1, var.distractor_2_loc-1, var.distractor_3_loc-1]
+# position index for the images (tar, dis_1, dis_2, dis_3)
+pos_index = [var.target_loc-1, 
+             var.distractor_1_loc-1, 
+             var.distractor_2_loc-1, 
+             var.distractor_3_loc-1]
 
 # image labels on the sketchpad
-img_labels = ['tar', 'dis_1', 'dis_2', 'dis_3']
-
-# name of the files 
-img_files = [var.target_img, var.distractor_1_img, var.distractor_2_img, var.distractor_3_img] 
+img_labels = ['target', 'distractor_1', 'distractor_2', 'distractor_3']
 
 for i in range(4):
     s = img_labels[i]
-    
     # set image position on the canvas
     sti[s].x, sti[s].y = pos[pos_index[i]]
-    
+```
+
+In the 'Run' tab, after the stimulus_display is shown, we send EyeLink Data Viewer messages to mark the onset of the stimuli and draw interest areas aound the images.
+
+```
+# We need a time offset to proper use a message to mark the onset of the stimulus_display screen
+time_offset = int(self.clock.time() - self.var.time_stimulus_display)
+
+exp.eyelink.sendMessage('%d stimulus_display' % time_offset)
+
+# Send over messages to record the interest areas, and the image paths
+# for Data Viewer visualization purposes
+pos = xy_circle(n=4, rho = 250)  # positions of the images
+img_w, img_h =[240, 240]  # image width and height
+
+img_labels = ['target', 'distractor_1', 'distractor_2', 'distractor_3']
+
+# position index for the images (target, distractor_1, distractor_2, distractor_3)
+pos_index = [var.target_loc-1, 
+             var.distractor_1_loc-1, 
+             var.distractor_2_loc-1, 
+             var.distractor_3_loc-1]
+
+# name of the image files 
+img_files = [var.target_img, 
+             var.distractor_1_img, 
+             var.distractor_2_img, 
+             var.distractor_3_img]
+
+for i in range(4):
+    im_x, im_y = pos[pos_index[i]]  # image position x, y
+
+    # interest area index (starts from 1)
+    ia_index = i + 1
+    # interest area img_label
+    ia_label = img_labels[i]
     # image position in the typical coordinates in computer graphics
-    ia_left = int(sti[s].x - img_w/2 + var.width/2) 
-    ia_top = int(sti[s].y - img_h/2 + var.height/2)
-    ia_right = int(sti[s].x + img_w/2 + var.width/2)
-    ia_bottom = int(sti[s].y + img_h/2 + var.height/2)
+    ia_left = int(im_x - img_w/2 + var.width/2) 
+    ia_top = int(im_y - img_h/2 + var.height/2)
+    ia_right = int(im_x + img_w/2 + var.width/2)
+    ia_bottom = int(im_y + img_h/2 + var.height/2)
     
-    # send Interest Area messages, IA labels should start with 1
-    ia_msg = '!V IAREA RECTANGLE %d %d %d %d %d %s' %(i+1, ia_left, ia_top, ia_right, ia_bottom, s)
+    # for precise timing, include a time offset in the Interest area message 
+    msg_offset = int(self.clock.time() - self.var.time_stimulus_display)
+    # construct and send the Interest Area messages
+    ia_msg_pars = (msg_offset, ia_index, ia_left, ia_top, ia_right, ia_bottom, ia_label)
+    ia_msg = '%d !V IAREA RECTANGLE %d %d %d %d %d %s' % ia_msg_pars
     exp.eyelink.sendMessage(ia_msg)
     
-    # IMGload commands for drawing pictures in Data viewer
-    img_path = '../images/' + img_files[i]
-    img_x = sti[s].x+var.width/2
-    img_y = sti[s].y+var.height/2
-    imgload_msg = '!V IMGLOAD CENTER %s %d %d'%(img_path, img_x, img_y)
+    # for precise timing, include a time offset in the IMGLOAD message
+    msg_offset = int(self.clock.time() - self.var.time_stimulus_display)
+
+    # construct and send the IMGload message
+    # Data Viewer will use this message to draw the images when visualizing data
+    img_path = '../../images/' + img_files[i]
+    img_x = im_x + var.width/2
+    img_y = im_y + var.height/2
+    imgload_msg = '%d !V IMGLOAD CENTER %s %d %d'%(msg_offset, img_path, img_x, img_y)
     exp.eyelink.sendMessage(imgload_msg)
+    
 ```
 In a for-loop, we send interest area messages to the tracker and record messages that will be used by Data Viewer to load the relevant background images for each trial. Transformation of the coordinates is needed to convert from OpenSesame’s centre coordinates to EyeLink’s top-left coordinates. In the for-loop, we first get the left, top, right, and bottom of each of the images. Then, use this information to construct interest area messages, and also the landmark drawing commands. The interest areas are all rectangular, for other types of Interest Areas, please see the Data Viewer User Manual. With these messages, the Interest area definitions will be automatically loaded into Data Viewer when an EDF data file is opened.
 
 ### 6.3 Message to mark trial events
 In the “MSG_target_word” inline script, we wait until the target word is played in the audio file. Then we send a message to the tracker to mark the onset of the target word (“grapes”). This message is critical for effective analysis, as without this message, it would be challenging to align the eye movement data to the onset of the target word.
 ```
-# wait for the onset of the target word, then should the mouse cursor
+# wait for the onset of the target word, then show the mouse cursor
 clock.sleep(var.target_word_onset_time)
 # send a message to let the tracker know the onset of the target word
 exp.eyelink.sendMessage('target_word_onset')
