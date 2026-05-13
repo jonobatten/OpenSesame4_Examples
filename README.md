@@ -234,7 +234,7 @@ This task requires precise timing for audio playback. Please bear in mind that S
 
 The overall organization of the script is not complicated - for introductory tutorials on programming in OpenSesame please check the Tutorial section on the OpenSesame website, [http://osdoc.cogsci.nl](http://osdoc.cogsci.nl).
 
-### 6.2 Interest Areas and Host PC landmarks
+### 6.2 Image order randomization and interest areas
 The Visual World task uses inline scripts, for example the “sti_preparation” inline item. Here we first create a list of four screen locations with the `xy_circle()` function. Then, we change the position of the objects based on the location specified in the “block” loop. The “location” of each object is specified in the block loop as integers, i.e., 1, 2, 3, 4. We use this variable as an index to set the position of each object by using the list of screen coordinates (`sti_pos`) we created with `xy_circle()`.
 ```
 # the positions of the objects
@@ -305,7 +305,9 @@ If your Display PC is not connected to the internet (which is common for dedicat
 
 *Standard Download (If both PCs have the exact same Python version and OS):*
 Open a terminal or command prompt on a machine with internet access and run:
-`pip download --no-deps sr-research-pylink opensesame-eyelink-coregraphics opensesame-plugin-eyelink -d ./eyelink_packages`
+```
+pip download --no-deps sr-research-pylink opensesame-eyelink-coregraphics opensesame-plugin-eyelink -d ./eyelink_packages
+```
 
 *Targeted Download (If the PCs have different Python versions or OS):*
 Force `pip` to download specific pre-compiled .whl files (wheels) for the target Display PC. Use the `--only-binary=:all:` flag to fetch only .whl files (ignoring source distributions) and the `--no-deps` flag to download only the specified packages. Include the specific `--python-version`, `--platform`, and `--abi` of the offline machine.
